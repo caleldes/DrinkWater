@@ -1,7 +1,8 @@
 import React from 'react';
-import {Platform, StyleSheet, Text, View, Button, TouchableOpacity, Image, Dimensions} from 'react-native';
+import {Platform, StyleSheet, Text, View, Button, TouchableOpacity, Image, Dimensions, ScrollView} from 'react-native';
 import { Constants, Location, Permissions } from 'expo';
 import axios from 'axios';
+import { Ionicons } from '@expo/vector-icons';
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -10,19 +11,23 @@ export default class HomeScreen extends React.Component {
 
   constructor(props) {
       super(props);
-
       this.state = {
           status: 'Can I drink water here?',
       };
   }
 
-  getWaterCondition(cityName){
-      axios.get(`http://192.168.43.213:8080/api/water-conditions/name/${cityName}`).then((result) => {
-          console.log(result.request.response);
-          }
-      ).catch(error => {
-          console.log(error);
+  componentWillMount(){
+      this.setState({
+          status: 'Can I drink water here?'
       })
+  }
+
+  async getWaterCondition(cityName){
+      const result = await axios.get(`http:/tapwater.herokuapp.com/api/water-condition/cityName/${cityName}`).catch(error => {
+          console.log(error);
+      });
+
+      return JSON.parse(result.request.response);
   }
 
   async getLocation() {
@@ -51,34 +56,41 @@ export default class HomeScreen extends React.Component {
           console.log(geocode);
 
           console.log("DONE");
+          // const cityName = "Gdańsk";
+          // const cityName = "Warszawa";
+          const cityName = "Kraków";
+          // const cityName = geocode[0].city;
+          const data =  await this.getWaterCondition(cityName);
           this.setState({
-              status: 'We are in ' + geocode[0].city,
-          });
-          this.getWaterCondition(geocode[0].city);
-
+              status: 'Can I drink water here?'
+          },() => this.props.navigation.navigate('Data', {
+                  data,
+                  cityName,
+              })
+          );
       }
       catch (error) {
           console.log("Failed to get geolocation:");
-          this.setState({
-              status: error,
-          });
           console.log(error);
       }
   }
 
   render() {
-  return (
-      <View style={styles.container}>
-          <Text style={styles.status}>{this.state.status}</Text>
-          <TouchableOpacity onPress={() => this.getLocation()} style={styles.button}>
-                <Image
-                    style={styles.image}
-                     source={require('./faucet.jpg')}
-                />
-          </TouchableOpacity>
-      </View>
-    );
-  }
+      const {
+        status,
+      } = this.state;
+      return (
+          <View style={styles.container}>
+              <Text style={styles.status}>{status}</Text>
+              <TouchableOpacity onPress={() => this.getLocation()} style={styles.button}>
+                    <Image
+                        style={styles.image}
+                         source={require('./faucet.jpg')}
+                    />
+              </TouchableOpacity>
+          </View>
+        );
+      }
 }
 
 const styles = StyleSheet.create({
@@ -89,13 +101,25 @@ const styles = StyleSheet.create({
         paddingTop: Constants.statusBarHeight,
         backgroundColor: 'steelblue',
     },
+    container2: {
+        flex: 1,
+        paddingTop: Constants.statusBarHeight,
+        backgroundColor: 'steelblue',
+    },
+    header: {
+        flexDirection: 'row',
+    },
+    headerTitle: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     paragraph: {
         margin: 24,
         fontSize: 18,
         textAlign: 'center',
     },
     image: {
-
         width: Dimensions.get('window').width - 180,
         height: Dimensions.get('window').width - 180,
         alignItems: 'center',
@@ -103,15 +127,42 @@ const styles = StyleSheet.create({
     },
     status: {
         marginBottom: 80,
-        color: 'skyblue',
-        fontSize: 30,
+        color: 'white',
+        fontSize: 40,
+        fontWeight: '400'
+    },
+    keyValue: {
+        fontSize: 40,
+        fontWeight: '400'
+    },
+    city: {
+        color: 'white',
+        fontSize: 40,
+        fontWeight: '400',
+        alignItems: 'center',
+    },
+    keyList:{
+        width: Dimensions.get('window').width,
+        justifyContent: 'center',
+    },
+    body:{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     button: {
         width: Dimensions.get('window').width - 100,
         height: Dimensions.get('window').width - 100,
-        backgroundColor: 'skyblue',
+        backgroundColor: 'white',
         borderRadius: 160,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    buttonBack: {
+
+        width: 50,
+        height: 50,
+        backgroundColor: 'white',
+        borderRadius: 50,
     }
 });
