@@ -1,5 +1,8 @@
 import React from 'react';
-import {Platform, StyleSheet, Text, View, Button, TouchableOpacity, Image, Dimensions, ScrollView} from 'react-native';
+import {
+    Platform, StyleSheet, Text, View, Button, TouchableOpacity, Image, Dimensions, ScrollView,
+    ImageBackground
+} from 'react-native';
 import { Constants, Location, Permissions } from 'expo';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,13 +15,13 @@ export default class HomeScreen extends React.Component {
   constructor(props) {
       super(props);
       this.state = {
-          status: 'Can I drink water here?',
+          status: 'Czy mogę się napić z kranu?',
       };
   }
 
   componentWillMount(){
       this.setState({
-          status: 'Can I drink water here?'
+          status: 'Czy mogę się napić z kranu?'
       })
   }
 
@@ -32,7 +35,7 @@ export default class HomeScreen extends React.Component {
 
   async getLocation() {
       this.setState({
-          status: 'Finding location...',
+          status: 'Sprawdzenie lokalizacji...',
       });
 
       console.log("Ask for location permission...");
@@ -56,13 +59,10 @@ export default class HomeScreen extends React.Component {
           console.log(geocode);
 
           console.log("DONE");
-          // const cityName = "Gdańsk";
-          // const cityName = "Warszawa";
-          const cityName = "Kraków";
-          // const cityName = geocode[0].city;
+          const cityName = geocode[0].city;
           const data =  await this.getWaterCondition(cityName);
           this.setState({
-              status: 'Can I drink water here?'
+              status: 'Czy mogę się napić z kranu?'
           },() => this.props.navigation.navigate('Data', {
                   data,
                   cityName,
@@ -80,7 +80,7 @@ export default class HomeScreen extends React.Component {
         status,
       } = this.state;
       return (
-          <View style={styles.container}>
+          <ImageBackground source={require('./background.jpg')} style={styles.container}>
               <Text style={styles.status}>{status}</Text>
               <TouchableOpacity onPress={() => this.getLocation()} style={styles.button}>
                     <Image
@@ -88,7 +88,7 @@ export default class HomeScreen extends React.Component {
                          source={require('./faucet.jpg')}
                     />
               </TouchableOpacity>
-          </View>
+          </ImageBackground>
         );
       }
 }
@@ -99,12 +99,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: Constants.statusBarHeight,
-        backgroundColor: 'steelblue',
+        width: '100%',
+        height: '110%',
     },
     container2: {
         flex: 1,
         paddingTop: Constants.statusBarHeight,
-        backgroundColor: 'steelblue',
+        width: '100%',
+        height: '110%',
     },
     header: {
         flexDirection: 'row',

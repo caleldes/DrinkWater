@@ -1,3 +1,6 @@
+/**
+ * Created by natal on 25.11.2018.
+ */
 import React from "react";
 import {Dimensions, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Constants} from "expo";
@@ -5,10 +8,10 @@ import {Ionicons} from "@expo/vector-icons";
 import {Entypo} from "@expo/vector-icons";
 
 
-export default class DataScreen extends React.Component {
+export default class HardnessStatusScreen extends React.Component {
     static navigationOptions = ({ navigation }) => {
         return {
-            title: " " + navigation.getParam('cityName'),
+            title: " Twardość Ogólna",
             headerTitleStyle: {
                 textAlign: "center",
                 alignSelf: "center",
@@ -23,77 +26,10 @@ export default class DataScreen extends React.Component {
             navigation,
         } = props;
         const data = navigation.getParam('data');
-        const viewStatus = this.calcViewStatus(data);
-        const hardnessStatus = this.calcHardnessStatus(data);
-        const nonorganicStatus = this.calcNonorganicStatus(data);
-        const mikroStatus = this.calcMikroStatus(data);
-        const status = Math.min(viewStatus.status, hardnessStatus.status, nonorganicStatus.status, mikroStatus.status);
+        const status = navigation.getParam('status');
         this.state = {
-            viewStatus,
-            hardnessStatus,
-            nonorganicStatus,
-            mikroStatus,
             status,
             data,
-        };
-        console.log(this.state);
-    }
-
-    calcViewStatus(data) {
-        const {
-            color,
-            smell
-        } = data;
-        const colorStatus = color < 2 ? 1 : (color > 3 ? -1 : 0);
-        const smellStatus = smell < 2 ? 1 : (smell > 3 ? -1 : 0);
-        const viewStatus = Math.min(colorStatus, smellStatus);
-        return {
-            status: viewStatus,
-            colorStatus,
-            smellStatus,
-        }
-    }
-
-    calcHardnessStatus(data){
-        const {
-            hardness
-        } = data;
-        const hardnessStatus = hardness < 400 ? 1 : (hardness > 500 ? -1 : 0);
-        return {
-            status: hardnessStatus,
-        }
-    }
-
-    calcNonorganicStatus(data){
-        const {
-            iron,
-            manganese,
-            ammonia,
-        } = data;
-        const ironStatus = iron < 200 ? 1 : (iron > 210 ? -1 : 0);
-        const manganeseStatus = manganese < 50 ? 1 : (manganese > 55 ? -1 : 0);
-        const amoniaStatus = ammonia < 0.5 ? 1 : (ammonia > 0.55 ? -1 : 0);
-        const nonorganicStatus = Math.min(ironStatus, manganeseStatus, amoniaStatus);
-        return {
-            status: nonorganicStatus,
-            ironStatus,
-            manganeseStatus,
-            amoniaStatus,
-        };
-    }
-
-    calcMikroStatus(data){
-        const {
-            bacteria,
-            ecola,
-        } = data;
-        const bacteriaStatus = bacteria < 50 ? 1 : (bacteria > 55 ? -1 : 0);
-        const ecolaStatus = ecola ? -1 : 1;
-        const mikroStatus = Math.min(bacteriaStatus, ecolaStatus);
-        return {
-            status: mikroStatus,
-            ecolaStatus,
-            bacteriaStatus,
         };
     }
 
@@ -124,11 +60,7 @@ export default class DataScreen extends React.Component {
     render() {
         const {
             status,
-            viewStatus,
-            hardnessStatus,
-            nonorganicStatus,
-            mikroStatus,
-            data,
+            data
         } = this.state;
 
         return (
@@ -136,21 +68,10 @@ export default class DataScreen extends React.Component {
                 <View style={styles.body}>
                     <View style={styles.keyList}>
                         <View style={styles.emoji}>
-                            {this.showEmoji(status)}
+                            {this.showEmoji(status.status)}
                         </View>
                         <ScrollView contentContainerStyle={styles.scroll}>
-                            <TouchableOpacity onPress={() => this.props.navigation.navigate('View', {data, status: viewStatus})} style={styles.buttonKey}>
-                                <Text style={{...styles.keyValue, ...{color: this.statusColor(viewStatus.status)}}}>Wzkażniki Organoleptyczne</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.props.navigation.navigate('Hardness', {data, status: hardnessStatus})} style={styles.buttonKey}>
-                                <Text style={{...styles.keyValue, ...{color: this.statusColor(hardnessStatus.status)}}} >Twardość Ogólna</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.props.navigation.navigate('Nonorganic', {data, status: nonorganicStatus})} style={styles.buttonKey}>
-                                <Text style={{...styles.keyValue, ...{color: this.statusColor(nonorganicStatus.status)}}} >Wzkażniki Nieorganiczne</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.props.navigation.navigate('Mikro', {data, status: mikroStatus})} style={styles.buttonKey}>
-                                <Text style={{...styles.keyValue, ...{color: this.statusColor(mikroStatus.status)}}} >Mikrobiologia</Text>
-                            </TouchableOpacity>
+                            <Text style={{...styles.keyValue, ...{color: this.statusColor(status.status)}}}>Twardość Ogólna {data.hardness}/400</Text>
                         </ScrollView>
                     </View>
                 </View>
